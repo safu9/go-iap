@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"testing"
 
+	"golang.org/x/oauth2/google"
 	"google.golang.org/api/androidpublisher/v3"
 	"google.golang.org/appengine/urlfetch"
 )
@@ -82,6 +83,27 @@ func TestNewWithClientErrors(t *testing.T) {
 		t.Errorf("got %v\nwant %v", actual, expected)
 	}
 
+}
+
+func TestNewWithCredentials(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	creds, _ := google.CredentialsFromJSON(ctx, jsonKey, androidpublisher.AndroidpublisherScope)
+	_, err := NewWithCredentials(creds)
+	if err != nil {
+		t.Errorf("got %#v", err)
+	}
+}
+
+func TestNewWithCredentialsErrors(t *testing.T) {
+	t.Parallel()
+	expected := "credentials is nil"
+
+	_, err := NewWithCredentials(nil)
+	if err == nil || err.Error() != expected {
+		t.Errorf("got %v\nwant %v", err, expected)
+	}
 }
 
 func TestAcknowledgeSubscription(t *testing.T) {

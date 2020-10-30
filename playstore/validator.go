@@ -87,6 +87,23 @@ func NewWithClient(jsonKey []byte, cli *http.Client) (*Client, error) {
 	return &Client{service}, err
 }
 
+func NewWithCredentials(credentials *google.Credentials) (*Client, error) {
+	if credentials == nil {
+		return nil, fmt.Errorf("credentials is nil")
+	}
+
+	c := &http.Client{Timeout: 10 * time.Second}
+	ctx := context.WithValue(context.Background(), oauth2.HTTPClient, c)
+
+	cli := oauth2.NewClient(ctx, credentials.TokenSource)
+	service, err := androidpublisher.NewService(ctx, option.WithHTTPClient(cli))
+	if err != nil {
+		return nil, err
+	}
+
+	return &Client{service}, err
+}
+
 // AcknowledgeSubscription acknowledges a subscription purchase.
 func (c *Client) AcknowledgeSubscription(
 	ctx context.Context,
